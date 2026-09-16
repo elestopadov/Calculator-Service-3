@@ -1,0 +1,79 @@
+import com.github.spotbugs.snom.Effort
+import com.github.spotbugs.snom.Confidence
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'checkstyle'
+    id 'com.github.spotbugs' version '6.5.11'
+}
+
+group = 'com.example'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+application {
+    mainClass = 'com.example.calculator.CalculatorService'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+checkstyle {
+    toolVersion = '10.21.4'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
+
+spotbugs {
+    effort = com.github.spotbugs.snom.Effort.valueOf('MAX')
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf('LOW')
+}
+
+tasks.named('spotbugsMain') {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+tasks.named('spotbugsTest') {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': application.mainClass.get()
+        )
+    }
+}
